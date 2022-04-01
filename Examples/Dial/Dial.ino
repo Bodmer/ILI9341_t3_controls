@@ -1,14 +1,10 @@
-#include <ILI9341_t3.h>
+#include <TFT_eSPI.h>
+#include <TFT_eSPI_ext.h>
 #include <ILI9341_t3_Controls.h>
 #include <font_Arial.h>
 #include <font_ArialBold.h>
 #define FONT_TITLE Arial_16
 #define FONT_DATA Arial_10_Bold
-
-// defines for pin connection
-#define TFT_CS        10
-#define TFT_DC        9
-#define LED_PIN       A9
 
 // defines for locations
 #define BXCENTER 80
@@ -39,7 +35,8 @@
 #define VTICCOLOR C_GREY
 
 // create the display object
-ILI9341_t3 Display(TFT_CS, TFT_DC);
+TFT_eSPI      tft = TFT_eSPI();
+TFT_eSPI_ext  Display = TFT_eSPI_ext(&tft);
 
 int bBits;
 float bVolts;
@@ -50,16 +47,11 @@ Dial Bits(&Display, BXCENTER, BYCENTER, BDIAMETER, BLOWSCALE , BHIGHSCALE, BSCAL
 Dial Volts(&Display, VXCENTER, VYCENTER, VDIAMETER, VLOWSCALE , VHIGHSCALE, VSCALEINC, VSWEEPANGLE);
 
 void setup() {
-
-  Serial.begin(9600);
-
-  // you know the drill
-  pinMode(LED_PIN, OUTPUT);
+  Serial.begin(115200);
 
   Display.begin();
   Display.setRotation(1);
   Display.fillScreen(C_BLACK);
-  digitalWrite(LED_PIN, 255);
 
   // initialize the dials
   Bits.init(BNEEDLECOLOR, BDIALCOLOR, BTEXTCOLOR, BTICCOLOR, "Bits", FONT_TITLE, FONT_DATA);
@@ -68,15 +60,17 @@ void setup() {
 }
 
 void loop() {
-
+  static float x = 0;
   // get some data
-  bBits = analogRead(A4);
+  bBits = (1.0 + sin(x)) * 1024/2;
   bVolts = bBits * 3.3 / 1024;
 
   // update the dials
   Bits.draw(bBits);
   Volts.draw(bVolts);
 
+  // bump the x value
+  x += .1;
   delay(150);
 
 

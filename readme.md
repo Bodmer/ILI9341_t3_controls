@@ -1,3 +1,10 @@
+Updated by Bodmer for TFT_eSPI library
+
+Requires use of TFT_eSPI extension library here:
+https://github.com/Bodmer/TFT_eSPI_ext
+
+Original ReadMe follows:
+
 <b><h2><center>Version 5.4 updated 12/20/2021</center></h1></b>
 1. Added a ring slider
 
@@ -17,29 +24,29 @@ While this library was created for the ILI9341_t3 and intended for Teensy-based 
 <br>
 <br>
 
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/BarChartH.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/BarChartV.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/CGraph.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/Dial.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/Equalizer.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/ColorPicker.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/RingSliders.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/BarChartH.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/BarChartV.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/CGraph.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/Dial.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/Equalizer.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/ColorPicker.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/RingSliders.jpg)
 
 <br>
 <br>
 
 This library also has controls for 1) buttons 2) check boxes and 3) option buttons
 
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/Button.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/Checkbox.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/OptionButton.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/Button.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/Checkbox.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/OptionButton.jpg)
 <br>
 <br>
 I have included a bonus example that shows how to create multi-screen interface
 <br>
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/MultiSceen.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/Eq.jpg)
-![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/EQSettings.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/MultiSceen.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/Eq.jpg)
+![header image](https://raw.github.com/KrisKasprzak/ILI9341_t3_controls/master/jpg/EQSettings.jpg)
 
 <br>
 <br>

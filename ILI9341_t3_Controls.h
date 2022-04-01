@@ -47,7 +47,7 @@ rev		date			author				change
 #include "Arduino.h"
 #endif
 
-#include <ILI9341_t3.h>   
+#include <TFT_eSPI_ext.h> 
 
 #define G_REPAINT 0
 #define G_DRAWOVER 1
@@ -163,9 +163,9 @@ class BarChartH {
 
 public:
 
-	BarChartH(ILI9341_t3 *Display);
+	BarChartH(TFT_eSPI_ext *Display);
 
-	void init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor, uint16_t BorderColor, uint16_t BarColor, uint16_t BarBColor, uint16_t BackColor,const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &ScaleFont );
+	void init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor, uint16_t BorderColor, uint16_t BarColor, uint16_t BarBColor, uint16_t BackColor,const tftfont_t &TitleFont , const tftfont_t &ScaleFont );
 
 	void setBarColor(uint16_t val = 0xF800);
 
@@ -181,9 +181,9 @@ public:
 
 
 private:
-		ILI9341_t3			*d;
-		ILI9341_t3_font_t	tf;
-		ILI9341_t3_font_t	sf;
+		TFT_eSPI_ext			*d;
+		tftfont_t	tf;
+		tftfont_t	sf;
 		bool	st = true, ss = true;
 		char	ti[20];
 		char	sc[20];
@@ -217,9 +217,9 @@ class BarChartV {
 
 public:
 
-	BarChartV(ILI9341_t3 *Display);
+	BarChartV(TFT_eSPI_ext *Display);
 
-	void init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor, uint16_t BorderColor, uint16_t BarColor, uint16_t BarBlankColor, uint16_t BackgroundColor,const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &ScaleFont );
+	void init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor, uint16_t BorderColor, uint16_t BarColor, uint16_t BarBlankColor, uint16_t BackgroundColor,const tftfont_t &TitleFont , const tftfont_t &ScaleFont );
 
 	void setBarColor(uint16_t val = 0xF800);
 
@@ -232,9 +232,9 @@ public:
 	void showScale(bool val);
 
 private:
-		ILI9341_t3			*d;
-		ILI9341_t3_font_t	tf;
-		ILI9341_t3_font_t	sf;
+		TFT_eSPI_ext			*d;
+		tftfont_t	tf;
+		tftfont_t	sf;
 		bool	st = true, ss = true;
 		char	ti[20];
 		char	sc[20];
@@ -269,9 +269,9 @@ class CGraph {
 
 public:
 
-	CGraph(ILI9341_t3 *disp, float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float XAxisLow, float XAxisHigh, float XAxisInc, float YAxisLow, float YAxisHigh, float YAxisInc);
+	CGraph(TFT_eSPI_ext *disp, float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float XAxisLow, float XAxisHigh, float XAxisInc, float YAxisLow, float YAxisHigh, float YAxisInc);
 
-	void init(const char *Title, const char *XAxis, const char *YAxis, uint16_t TextColor, uint16_t GridColor, uint16_t AxisColor, uint16_t BackColor,uint16_t PlotkColor, const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &AxisFont );
+	void init(const char *Title, const char *XAxis, const char *YAxis, uint16_t TextColor, uint16_t GridColor, uint16_t AxisColor, uint16_t BackColor,uint16_t PlotkColor, const tftfont_t &TitleFont , const tftfont_t &AxisFont );
 
 	void plot(int ID, float y);
 
@@ -309,9 +309,9 @@ public:
 
 private:
 
-		ILI9341_t3			*d;
-		ILI9341_t3_font_t	tf;
-		ILI9341_t3_font_t	af;
+		TFT_eSPI_ext			*d;
+		tftfont_t	tf;
+		tftfont_t	af;
 		int ID = 0;
 		float x, y;
 		float	i, j;
@@ -330,10 +330,10 @@ private:
 		int StartPointX, StartPointY;
 		char buf0[20], buf1[20], buf2[20], buf3[20], buf4[20], buf5[20], buf6[20], buf7[20], buf8[20], buf9[20];
 		char    *dl[20] = {buf0, buf1, buf2, buf3, buf4, buf5, buf6, buf6, buf8, buf9};
-		char	t[20];
+		char	t[30];
 		byte tl = 0; // title location
-		char	xa[20];
-		char	ya[20];
+		char	xa[30];
+		char	ya[30];
 		uint16_t tc;
 		uint16_t dc[10];
 		uint16_t ac;
@@ -350,18 +350,18 @@ private:
 
 class Dial {
 public:
-	Dial(ILI9341_t3 *disp, int CenterX, int CenterY, int DialRadius, float LowVal , float HiVal , float ValInc, float SweepAngle);
+	Dial(TFT_eSPI_ext *disp, int CenterX, int CenterY, int DialRadius, float LowVal , float HiVal , float ValInc, float SweepAngle);
 	
-	void init(uint16_t NeedleColor, uint16_t DialColor, uint16_t TextColor, uint16_t TickColor, const char *Title, const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &DataFont );
+	void init(uint16_t NeedleColor, uint16_t DialColor, uint16_t TextColor, uint16_t TickColor, const char *Title, const tftfont_t &TitleFont , const tftfont_t &DataFont );
 
 	void draw(float val);
 		
 private:
 	
 	bool Redraw = true;
-	ILI9341_t3			*d;			
-	ILI9341_t3_font_t	tf;
-	ILI9341_t3_font_t	df;
+	TFT_eSPI_ext			*d;			
+	tftfont_t	tf;
+	tftfont_t	df;
 	char t[10];
 	int cx;
 	int cy;
@@ -414,7 +414,7 @@ class SliderH {
 
  public:
 
-	SliderH(ILI9341_t3 *Display);		// class constructor
+	SliderH(TFT_eSPI_ext *Display);		// class constructor
 		
 	void init(uint16_t SliderX, uint16_t SliderY, uint16_t SliderW, float ScaleLow, float ScaleHi, float Scale, float Snap, uint16_t SliderColor, uint16_t BackgroundColor, uint16_t HandleColor);		// initializer
   
@@ -454,7 +454,7 @@ class SliderH {
 
 private:
 
-	ILI9341_t3 *d;			// the display object
+	TFT_eSPI_ext *d;			// the display object
 	uint16_t sColor;		// the slider color
 	uint16_t bColor;		// the slider background color
 	uint16_t hColor;		// the sliders drag handle
@@ -492,7 +492,7 @@ class SliderV {
 
  public:
 
-	SliderV(ILI9341_t3 *Display); // class constructor
+	SliderV(TFT_eSPI_ext *Display); // class constructor
   
 	void init(uint16_t SliderX, uint16_t SliderY, uint16_t SliderH, float ScaleLow, float ScaleHi, float scale, float snap, uint16_t SliderColor, uint16_t BackgroundColor, uint16_t HandleColor);	// initializer
    
@@ -532,7 +532,7 @@ class SliderV {
 
 private:
 
-	ILI9341_t3 *d;			// the display object
+	TFT_eSPI_ext *d;			// the display object
 	uint16_t sColor;		// the slider color
 	uint16_t bColor;		// the slider background color
 	uint16_t hColor;		// the sliders drag handle
@@ -571,7 +571,7 @@ class SliderOnOff {
 
  public:
 	
-	SliderOnOff(ILI9341_t3 *display, uint16_t SliderX, uint16_t SliderY, uint16_t SliderW, uint16_t SliderH, uint16_t SliderColor, uint16_t BackColor, uint16_t OnColor, uint16_t OffColor);// class constructor
+	SliderOnOff(TFT_eSPI_ext *display, uint16_t SliderX, uint16_t SliderY, uint16_t SliderW, uint16_t SliderH, uint16_t SliderColor, uint16_t BackColor, uint16_t OnColor, uint16_t OffColor);// class constructor
   
 	void draw(bool state);			// method to draw complete slider
    
@@ -583,7 +583,7 @@ class SliderOnOff {
      
 private:
 
-	ILI9341_t3 *_d;			// the display object
+	TFT_eSPI_ext *_d;			// the display object
 	uint16_t _sColor;		// the slider color
 	uint16_t _bColor;		// the slider background color
 	uint16_t _onColor;		// the sliders on color
@@ -606,11 +606,11 @@ Button class inspired by Adafruit, but added several methods
 
 class Button {
 public:
-    Button(ILI9341_t3 *Display) {d = Display; }
+    Button(TFT_eSPI_ext *Display) {d = Display; }
 
 	void init(int16_t ButtonX, int16_t ButtonY, uint8_t ButtonWidth, uint8_t ButtonHeight,
 		uint16_t OutlineColor, uint16_t ButtonColor, uint16_t TextColor, uint16_t BackgroundColor,
-		const char *ButtonText, int TextOffsetX, int TextOffsetY, const ILI9341_t3_font_t &TextFont ) {
+		const char *ButtonText, int TextOffsetX, int TextOffsetY, const tftfont_t &TextFont ) {
 
 		x = ButtonX;
 		y = ButtonY;
@@ -684,7 +684,7 @@ public:
 			}
 			
 			d->setCursor(x + x_offset - (strlen(label)*3) , y + y_offset);
-			d->setFont(f);
+			d->setTTFont(f);
 			d->setTextColor(disablecolortext);
 			d->print(label);
 		}
@@ -703,7 +703,7 @@ public:
 			}
 
 			d->setCursor(x + x_offset - (strlen(label)*3) , y + y_offset);
-			d->setFont(f);
+			d->setTTFont(f);
 			d->setTextColor(text);
 			d->print(label);
 		}
@@ -781,7 +781,7 @@ public:
 		
 	}
 
-	void setFont(int TextOffsetX, int TextOffsetY, const ILI9341_t3_font_t &TextFont) {
+	void setTTFont(int TextOffsetX, int TextOffsetY, const tftfont_t &TextFont) {
 		x_offset = TextOffsetX;
 		y_offset = TextOffsetY;
 		f = TextFont;
@@ -812,8 +812,8 @@ public:
 	int value;
 
 private:
-	ILI9341_t3 *d;
-	ILI9341_t3_font_t f;
+	TFT_eSPI_ext *d;
+	tftfont_t f;
 	int16_t x, y;
 	uint16_t w, h;
 	int x_offset, y_offset;
@@ -839,9 +839,9 @@ Checkbox class
 
 class CheckBox {
 public:
-	CheckBox(ILI9341_t3 *Display) {d = Display; }
+	CheckBox(TFT_eSPI_ext *Display) {d = Display; }
 
-	void init(int16_t ButtonX, uint16_t ButtonY, uint16_t OutlineColor, uint16_t UPColor, uint16_t DownColor, uint16_t TextColor, uint16_t BackgroundColor, int TextOffsetX,int TextOffsetY, const char *Text, const ILI9341_t3_font_t &TextFont ) {
+	void init(int16_t ButtonX, uint16_t ButtonY, uint16_t OutlineColor, uint16_t UPColor, uint16_t DownColor, uint16_t TextColor, uint16_t BackgroundColor, int TextOffsetX,int TextOffsetY, const char *Text, const tftfont_t &TextFont ) {
 
 		x = ButtonX ;
 		y = ButtonY + CHECKBOX_SIZE;
@@ -911,7 +911,7 @@ public:
 		d->drawRoundRect(x, y-s, s, s, ct, outline);
 
 		d->setCursor(x + tox+(s/2), y - s + toy);
-		d->setFont(f);
+		d->setTTFont(f);
 		d->setTextColor(tcolor);
 		d->print(label);
 	}
@@ -975,7 +975,7 @@ public:
 		
 	}
 
-	void setText(int TextOffsetX,int TextOffsetY, const char *Text, const ILI9341_t3_font_t &TextFont) {
+	void setText(int TextOffsetX,int TextOffsetY, const char *Text, const tftfont_t &TextFont) {
 
 		tox = TextOffsetX;
 		toy = TextOffsetY;
@@ -1005,9 +1005,9 @@ public:
 	bool value;
 
 private:
-	ILI9341_t3 *d;
+	TFT_eSPI_ext *d;
 	char label[60];
-	ILI9341_t3_font_t f;
+	tftfont_t f;
 	int16_t x, y;
 	uint16_t s, ct;
 	uint16_t oc, uc, dc, bc, doc, duc, ddc, dtc, tc;
@@ -1029,9 +1029,9 @@ class OptionButton {
 
 	
 public:
-	OptionButton(ILI9341_t3 *Display) {d = Display; }
+	OptionButton(TFT_eSPI_ext *Display) {d = Display; }
 
-	void init(uint16_t OutlineColor, uint16_t SelectedColor, uint16_t UnSelectedColor, int16_t TextColor, uint16_t BackgroundColor, int TextOffsetX,int TextOffsetY, const ILI9341_t3_font_t &TextFont) {
+	void init(uint16_t OutlineColor, uint16_t SelectedColor, uint16_t UnSelectedColor, int16_t TextColor, uint16_t BackgroundColor, int TextOffsetX,int TextOffsetY, const tftfont_t &TextFont) {
 
 		r = OPTION_BUTTON_RADIUS;
 		oc = OutlineColor;
@@ -1087,7 +1087,7 @@ public:
 			for (i = 0; i < ID; i++){
 				d->fillCircle(x[i]+r/2, y[i]+r/2, r, bc);
 				d->setCursor(x[i] + tox, y[i] + toy);
-				d->setFont(f);
+				d->setTTFont(f);
 				d->setTextColor(bc);
 				d->print(label[i]);
 			}
@@ -1117,7 +1117,7 @@ public:
 			}
 			d->drawCircle(x[i]+r/2, y[i]+r/2, r, toc);
 			d->setCursor(x[i] + tox, y[i] + toy);
-			d->setFont(f);
+			d->setTTFont(f);
 			d->setTextColor(tcolor);
 			d->print(label[i]);
 		}
@@ -1191,7 +1191,7 @@ public:
 				
 	}
 
-	void setFont(int TextOffsetX,int TextOffsetY, const ILI9341_t3_font_t &TextFont) {
+	void setTTFont(int TextOffsetX,int TextOffsetY, const tftfont_t &TextFont) {
 		
 		tox = TextOffsetX;
 		toy = TextOffsetY;
@@ -1223,9 +1223,9 @@ public:
 	int option;
 
 private:
-	ILI9341_t3 *d;
+	TFT_eSPI_ext *d;
 	char label[MAX_OPTION][60];
-	ILI9341_t3_font_t f;
+	tftfont_t f;
 	uint16_t x[MAX_OPTION], y[MAX_OPTION];
 	float rv[MAX_OPTION];
 	uint16_t r;
@@ -1243,7 +1243,7 @@ class SliderD {
 
  public:
 
-	SliderD(ILI9341_t3 *Display); // class constructor
+	SliderD(TFT_eSPI_ext *Display); // class constructor
   
 	void init(uint16_t SliderX, uint16_t SliderY, uint16_t SliderR, float SweepAngle, float ScaleLow, float ScaleHi, uint16_t SliderColor, uint16_t BackgroundColor, uint16_t HandleColor);	// initializer
    
@@ -1280,7 +1280,7 @@ class SliderD {
 
 private:
 
-	ILI9341_t3 *d;			// the display object
+	TFT_eSPI_ext *d;			// the display object
 	uint16_t sColor;		// the slider color
 	uint16_t bColor;		// the slider background color
 	uint16_t hColor;		// the sliders drag handle

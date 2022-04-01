@@ -1,12 +1,12 @@
 /*
 
-  MCU                       https://www.amazon.com/Teensy-3-2-with-pins/dp/B015QUPO5Y/ref=sr_1_2?s=industrial&ie=UTF8&qid=1510373806&sr=1-2&keywords=teensy+3.2
-  Display                   https://www.amazon.com/Wrisky-240x320-Serial-Module-ILI9341/dp/B01KX26JJU/ref=sr_1_10?ie=UTF8&qid=1510373771&sr=8-10&keywords=240+x+320+tft
-  display library           https://github.com/PaulStoffregen/ILI9341_t3
-  touchscreen lib           https://github.com/dgolda/UTouch
+  MCU                       Any compatible with TFT_eSPI
+  Display                   Any compatible with TFT_eSPI
+  display library           https://github.com/Bodmer/TFT_eSPI
+  extension library         https://github.com/Bodmer/TFT_eSPI_ext
 
 
-  BarChartV(ILI9341_t3 *disp, float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc);
+  BarChartV(TFT_eSPI *disp, float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc);
   void init(const char *Title, uint16_t TextColor, uint16_t BarColor, uint16_t BarBColor, uint16_t BackColor,const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &ScaleFont );
   void setBarColor(uint16_t val = 0xF800);
   void draw(float val);
@@ -22,21 +22,21 @@
 
 */
 
-#include <ILI9341_t3.h>           // fast display driver lib
-#include "UTouch.h"               // touchscreen lib
+#include <TFT_eSPI.h>
+#include <TFT_eSPI_ext.h> 
+
 // step 1 implement the library
 #include <ILI9341_t3_Controls.h>
+
 #include <font_Arial.h>  // custom control define file
 
 #define FONT_TITLE Arial_24
 #define FONT_DATA Arial_16
 
-#define TFT_CS        10
-#define TFT_DC        9
-#define LED_PIN       A9
+#define LED_PIN       LED_BUILTIN
 
-
-ILI9341_t3 Display(TFT_CS, TFT_DC);
+TFT_eSPI      tft = TFT_eSPI();
+TFT_eSPI_ext  Display = TFT_eSPI_ext(&tft);
 
 int a7Bits, a8Bits;
 float a7Volts, a8Volts;
@@ -46,16 +46,13 @@ BarChartV A7Volts(&Display );
 BarChartV A8Volts(&Display );
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
-  pinMode(TFT_CS,  OUTPUT);
-  pinMode(TFT_DC,  OUTPUT);
   pinMode(LED_PIN, OUTPUT);
-  while (!Serial); // used for leonardo debugging
 
   Display.begin();
   Display.setRotation(1);
-  Display.fillScreen(ILI9341_BLACK);
+  Display.fillScreen(TFT_BLACK);
   digitalWrite(LED_PIN, HIGH);
 
   // step 3 initialize the bar chart objects
@@ -68,8 +65,8 @@ void setup() {
 
 void loop() {
 
-  a7Bits = analogRead(A7);
-  a8Bits = analogRead(A8);
+  a7Bits = random(1024);
+  a8Bits = random(1024);
 
   a7Volts = a7Bits * 3.3 / 1024;
   a8Volts = a8Bits * 3.3 / 1024;

@@ -1,14 +1,14 @@
 /*
 
-  MCU                       https://www.amazon.com/Teensy-3-2-with-pins/dp/B015QUPO5Y/ref=sr_1_2?s=industrial&ie=UTF8&qid=1510373806&sr=1-2&keywords=teensy+3.2
-  Display                   https://www.amazon.com/Wrisky-240x320-Serial-Module-ILI9341/dp/B01KX26JJU/ref=sr_1_10?ie=UTF8&qid=1510373771&sr=8-10&keywords=240+x+320+tft
-  display library           https://github.com/PaulStoffregen/ILI9341_t3
-  touchscreen lib           https://github.com/dgolda/UTouch
+  MCU                       Any compatible with TFT_eSPI
+  Display                   Any compatible with TFT_eSPI
+  display library           https://github.com/Bodmer/TFT_eSPI
+  extension library         https://github.com/Bodmer/TFT_eSPI_ext
 
     available methods
 
     // required
-  SliderH(ILI9341_t3 *Display);   // class constructor
+  SliderH(TFT_eSPI *Display);   // class constructor
   void init(uint16_t SliderX, uint16_t SliderY, uint16_t SliderW, float ScaleLow, float ScaleHi, float Scale, float Snap, uint16_t SliderColor, uint16_t BackgroundColor, uint16_t HandleColor);    // initializer
   void draw(float val);         // method to draw complete slider
   float slide(float ScreenX, float ScreenY);       // method to move handle as user drags finger over handle,
@@ -38,16 +38,13 @@
   Implementatin is 5 steps
 
 */
-#include <ILI9341_t3.h>           // fast display driver lib
-#include "UTouch.h"               // touchscreen lib
+#include <TFT_eSPI.h>
+#include <TFT_eSPI_ext.h>
 // step 1 include the lib
 #include <ILI9341_t3_Controls.h>  // custom control define file
 #include <font_Arial.h>
 
 #define FONT Arial_16
-#define TFT_DC 9                  // DC pin on LCD
-#define TFT_CS 10                 // chip select pin on LCD
-#define LCD_PIN A9                // lcd pin to control brightness
 
 // defines for locations
 #define ROW0 30
@@ -57,17 +54,14 @@
 #define ROW4 190
 
 byte RedByte = 70, GreenByte = 170, BlueByte = 210, BrightByte = 255;
-int BtnX, BtnY;
+uint16_t BtnX, BtnY;
 
 char buf[22];
 uint16_t color, oldcolor;
 
 // create display and DS objects
-ILI9341_t3 Display = ILI9341_t3(10, 9);
-
-// create the touch screen object
-// UTouch(byte tclk, byte tcs, byte tdin, byte dout, byte irq);
-UTouch  Touch( 6, 5, 4, 3, 2);
+TFT_eSPI      tft = TFT_eSPI();
+TFT_eSPI_ext  Display = TFT_eSPI_ext(&tft);
 
 // step 2 create the objects
 //SliderH Red(&Display, left, top, width, bar color, back color, ball color);
@@ -79,42 +73,34 @@ SliderH Blue(&Display);
 
 void setup() {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
-  //you know the drill
-  pinMode(LCD_PIN, OUTPUT);
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
-  pinMode(4, INPUT);
-  pinMode(5, INPUT);
-  pinMode(6, INPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 
   // step 3 initialize each slider
   // low limit, high limit, scale val (0 is off), snap value (0 is off))
   Bright.init (20, ROW1, 100, 55, 255,     0, 0, C_WHITE, C_BLACK, C_GREY);
 
-  Red.init    (20, ROW2, 100, 0, 255, 127.5, 0, C_WHITE, C_BLACK, C_GREEN);
-  Green.init  (20, ROW3, 100, 0, 255, 63.75, 0, C_WHITE, C_BLACK, C_BLUE);
-  Blue.init   (20, ROW4, 100, 0, 255,     0, 0, C_WHITE, C_BLACK, C_RED);
+  Red.init    (20, ROW2, 100, 0, 255, 127.5, 0, C_WHITE, C_BLACK, C_RED);
+  Green.init  (20, ROW3, 100, 0, 255, 63.75, 0, C_WHITE, C_BLACK, C_GREEN);
+  Blue.init   (20, ROW4, 100, 0, 255,     0, 0, C_WHITE, C_BLACK, C_BLUE);
 
   // fire up the display
   Display.begin();
 
   // fire up the touch display
-  Touch.InitTouch(PORTRAIT);
-  Touch.setPrecision(PREC_EXTREME);
+  uint16_t calData[5] = { 243, 3657, 243, 3576, 7 };
+  Display.setTouch(calData);
 
   Display.invertDisplay(false);
   Display.fillScreen(C_BLACK);
-
-  // turn on the display
-  analogWrite(LCD_PIN, 255);
 
   // set some display settings
   Display.setRotation(1);
   Display.setTextSize(2);
   Display.setTextColor(C_WHITE, C_BLACK);
-  Display.setFont(FONT);
+  Display.setTTFont(FONT);
   Display.setCursor(10 , 10 );
   Display.print(F("Color Picker"));
 
@@ -131,7 +117,7 @@ void setup() {
   Display.drawRect(141, 81, 98, 98, C_WHITE);
   Display.fillRect(142, 82, 96, 96, color);
 
-  sprintf(buf, "(%3d),%3d,%3d,%3d", color, RedByte, GreenByte, BlueByte);
+  sprintf(buf, "0x%04X, %3d, %3d, %3d         ", color, RedByte, GreenByte, BlueByte);
   Display.setCursor(50 , 220 );
   Display.print(buf);
 
@@ -141,7 +127,7 @@ void setup() {
 void loop() {
 
   // wait for touch
-  if (Touch.dataAvailable()) {
+  if (Display.getTouch(&BtnX, &BtnY)) {
     ProcessTouch();
 
     // how to enable disable a slider
@@ -174,48 +160,19 @@ void loop() {
       Display.drawRect(141, 81, 98, 98, C_WHITE);
       Display.fillRect(142, 82, 96, 96, color);
       Display.fillRect(50, 220, 200, 50, C_BLACK);
-      sprintf(buf, "(%3d),%3d,%3d,%3d", color, (int)Red.value, (int) Green.value, (int) Blue.value);
+      sprintf(buf, "0x%04X, %3d, %3d, %3d  ", color, (int)Red.value, (int) Green.value, (int) Blue.value);
       Display.setCursor(50 , 220 );
       Display.print(buf);
     }
     // as mentioned above, you code processes regardless if slider was moved
     // here we reset brightness on ANY slider move--don't like it? add changed check to
     // only process if bright slider was moved
-    analogWrite(LCD_PIN, Bright.value);
+    analogWrite(LED_BUILTIN, Bright.value);
   }
 
 }
 
 void ProcessTouch() {
-
-  // depending on the touch library you may need to change methods here
-  Touch.read();
-
-  BtnX = Touch.getX();
-  BtnY = Touch.getY();
-
-  // consistency between displays is a mess...
-  // this is some debug code to help show
-  // where you pressed and the resulting map
-
-  //Serial.print("real coordinates: ");
-  //Serial.print(BtnX);
-  //Serial.print(",");
-  //Serial.println (BtnY);
-  // Display.drawPixel(BtnX, BtnY, C_RED);
-
-  //different values depending on where touch happened
-
-  // x  = map(x, real left, real right, 0, 480);
-  // y  = map(y, real bottom, real top, 320, 0);
-
-  // tft with yellow headers
-  //BtnX  = map(BtnX, 240, 0, 320, 0);
-  //BtnY  = map(BtnY, 379, 0, 240, 0);
-
-  // tft with black headers
-  BtnX  = map(BtnX, 0, 240, 320, 0);
-  BtnY  = map(BtnY, 0, 380, 240, 0);
 
   //Serial.print(", Mapped coordinates: ");
   //Serial.print(BtnX);

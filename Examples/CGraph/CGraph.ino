@@ -1,4 +1,5 @@
-#include <ILI9341_t3.h>           // fast display driver lib
+#include <TFT_eSPI.h>
+#include <TFT_eSPI_ext.h>
 #include <ILI9341_t3_Controls.h>
 #include <font_Arial.h>           // custom fonts that ships with ILI9341_t3.h
 
@@ -6,12 +7,9 @@
 #define FONT_TITLE Arial_16
 #define FONT_DATA Arial_10
 
-// For the Adafruit shield, these are the default.
-#define TFT_DC  9
-#define TFT_CS 10
-
-// Use hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
-ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
+// create the display object
+TFT_eSPI      tft = TFT_eSPI();
+TFT_eSPI_ext  Display = TFT_eSPI_ext(&tft);
 
 // defines for graph location and scales
 #define X_ORIGIN    50
@@ -43,17 +41,13 @@ float x, volts;
 // create an ID for each data to be plotted
 int VoltID, SinID, CosID;
 
-// create the display object
-ILI9341_t3 Display(TFT_CS, TFT_DC);
-
-
 // create the cartesian coordinate graph object
 CGraph MyGraph(&Display, X_ORIGIN, Y_ORIGIN, X_WIDE, Y_HIGH, X_LOSCALE, X_HISCALE, X_INC, Y_LOSCALE, Y_HISCALE, Y_INC);
 
 
 void setup() {
 
-  Serial.begin(57600);
+  Serial.begin(115200);
 
   // fire up the display
   Display.begin();
@@ -62,7 +56,7 @@ void setup() {
 
 
   // initialize the graph object
-  MyGraph.init("Teensy Graphing", "Time [sec]", "Volts", TEXTCOLOR, GRIDCOLOR, AXISCOLOR, BACKCOLOR, PLOTCOLOR, FONT_TITLE, FONT_DATA);
+  MyGraph.init("TFT_eSPI Graphing", "Time [sec]", "Volts", TEXTCOLOR, GRIDCOLOR, AXISCOLOR, BACKCOLOR, PLOTCOLOR, FONT_TITLE, FONT_DATA);
 
   // use the add method to create a plot for each data
   // PlotID = MyGraph.Add(data title, data color);
@@ -72,7 +66,7 @@ void setup() {
 
   // these call are all optional
   MyGraph.drawGraph();		// draw empty graph if you have a long delay before any plottable data
-  MyGraph.setMarkerSize(VoltID, 0); 
+  MyGraph.setMarkerSize(VoltID, 1); 
   MyGraph.setMarkerSize(SinID, 1);
   // MyGraph.setYAxis(-1.5, 2.5, 0.5);  // reset the y axis at any time in your program
   // MyGraph.showTitle(false);          //  hide the title--good for big graph in tight space

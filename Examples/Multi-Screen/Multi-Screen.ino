@@ -11,10 +11,10 @@
 
 */
 
-#include <SPI.h>
-#include "ILI9341_t3.h"
+#include <TFT_eSPI.h>
+#include <TFT_eSPI_ext.h>
 #include "font_Arial.h"      // custom fonts that ships with ILI9341_t3.h
-#include "UTouch.h"                     // touchscreen lib
+
 #include "ILI9341_t3_Controls.h"
 
 //my way of defining fonts
@@ -22,14 +22,6 @@
 #define F_A20 Arial_20
 #define F_A14 Arial_14
 #define F_A10 Arial_10
-
-// typical tft pin definition
-#define TFT_RST 8
-#define TFT_DC 9
-#define TFT_CS 10
-
-// i connect LED to A9 so i can manage brightness
-#define LCD_PIN A9
 
 // just a bunch of location defs
 #define ROW1 50
@@ -49,7 +41,7 @@
 #define BAND8 300
 #define MINDB -12
 #define MAXDB 12
-#define TOP 67
+#define TOP 77
 #define HEIGHT 144
 
 // some color defs
@@ -59,7 +51,7 @@
 #define TEXTCOLOR C_WHITE
 
 // variables to hold slider values
-float BtnX, BtnY;
+uint16_t BtnX, BtnY;
 float Band1 = 0;
 float Band2 = 0;
 float Band3 = 0;
@@ -79,10 +71,8 @@ byte Snap0ID, Snap1ID, Snap2ID, Snap3ID;
 float TickSetting = 2.0;
 float SnapSetting = 1.0;
 
-ILI9341_t3 Display = ILI9341_t3(TFT_CS, TFT_DC);
-
-UTouch  Touch( 6, 5, 4, 3, 2);
-
+TFT_eSPI      tft = TFT_eSPI();
+TFT_eSPI_ext  Display = TFT_eSPI_ext(&tft);
 
 // create buttons, check boxes, option buttons
 Button EqualizerBTN(&Display);
@@ -113,18 +103,18 @@ CheckBox SnapCB(&Display);
 
 void setup() {
 
-  Serial.begin(9600);
-  pinMode(LCD_PIN, OUTPUT);
+  Serial.begin(115200);
+
   // setup display
   delay(100);
   Display.begin();
-  digitalWrite(LCD_PIN, 255);
+
   // set orientation--using math to flip display upside down if display is mounted that way
   Display.setRotation(1);
   Display.fillScreen(BackColor);
 
-  Touch.InitTouch(PORTRAIT);
-  Touch.setPrecision(PREC_EXTREME);
+  uint16_t calData[5] = { 243, 3657, 243, 3576, 7 };
+  Display.setTouch(calData);
 
   // initialize buttons
   EqualizerBTN.init(   160, 100, 220, 40, C_BLUE, C_WHITE, BackColor, BackColor,  "Equalizer", -25, -8, F_A20 ) ;
@@ -179,7 +169,7 @@ void setup() {
 void loop() {
 
 
-  if (Touch.dataAvailable()) {
+  if (Display.getTouch(&BtnX, &BtnY)) {
     ProcessTouch();
 
     // if user want's to see sub-screen (an equalizer in this case)
@@ -218,11 +208,11 @@ void Draw_MainMenu() {
 
   Display.fillRect(0, 0, 480, 50, C_DKBLUE);
   Display.setTextColor(C_WHITE);
-  Display.setFont(F_A24);
+  Display.setTTFont(F_A24);
   Display.setCursor(10 , 10 );
   Display.print(F("Main Menu"));
 
-  Display.setFont(F_A24);
+  Display.setTTFont(F_A24);
   Display.setTextColor(C_WHITE, BackColor);
 
   EqualizerBTN.draw();
@@ -247,7 +237,7 @@ void Process_Equalizer() {
   // begin the proceessing loop
   while (KeepIn) {
 
-    if (Touch.dataAvailable()) {
+    if (Display.getTouch(&BtnX, &BtnY)) {
       // my way of handling screen presses and adjusting to get correct screen coorinates--since different
       // tft's react differently
       ProcessTouch();
@@ -299,7 +289,7 @@ void Draw_EqualizerScreen() {
   Display.fillScreen(BackColor);
   Display.fillRect(0, 0, 480, 50, C_DKBLUE);
   Display.setTextColor(C_WHITE);
-  Display.setFont(F_A24);
+  Display.setTTFont(F_A24);
   Display.setCursor(10 , 10 );
   Display.print(F("Equalizer"));
 
@@ -326,24 +316,25 @@ void Draw_EqualizerText() {
   char buf[4];
 
   Display.setTextColor(C_WHITE, BackColor);
-  Display.setFontAdafruit();
+  
+  Display.clearTTFont();
   Display.setTextSize(1);
   sprintf(buf, "% 3d", (int) sBand1.value);
-  Display.setCursor(BAND1 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND1 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand2.value);
-  Display.setCursor(BAND2 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND2 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand3.value);
-  Display.setCursor(BAND3 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND3 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand4.value);
-  Display.setCursor(BAND4 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND4 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand5.value);
-  Display.setCursor(BAND5 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND5 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand6.value);
-  Display.setCursor(BAND6 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND6 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand7.value);
-  Display.setCursor(BAND7 - 10 , TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND7 - 10 , TOP - 17 ); Display.print(buf);
   sprintf(buf, "% 3d", (int) sBand8.value);
-  Display.setCursor(BAND8 - 10, TOP - 10 ); Display.print(buf);
+  Display.setCursor(BAND8 - 10, TOP - 17 ); Display.print(buf);
 
   Display.setCursor(BAND1 , TOP + HEIGHT + 10 ); Display.print(F("63"));
   Display.setCursor(BAND2 , TOP + HEIGHT + 10 ); Display.print(F("125"));
@@ -372,7 +363,7 @@ void Process_SettingsScreen() {
 
   // begin the processing loop as in all my processing screens
   while (KeepIn) {
-    if (Touch.dataAvailable()) {
+    if (Display.getTouch(&BtnX, &BtnY)) {
 
       ProcessTouch();
 
@@ -433,7 +424,7 @@ void Draw_SettingsScreen() {
   Display.fillScreen(BackColor);
   Display.fillRect(0, 0, 480, 50, C_DKBLUE);
   Display.setTextColor(C_WHITE);
-  Display.setFont(F_A24);
+  Display.setTTFont(F_A24);
   Display.setCursor(10 , 10 );
   Display.print(F("Settings"));
 
@@ -461,7 +452,7 @@ void Process_SetColors() {
   Display.fillScreen(BackColor);
   Display.fillRect(0, 0, 480, 50, C_DKBLUE);
   Display.setTextColor(C_WHITE);
-  Display.setFont(F_A24);
+  Display.setTTFont(F_A24);
   Display.setCursor(10 , 10 );
   Display.print(F("Background "));
 
@@ -479,7 +470,7 @@ void Process_SetColors() {
   // presses done button
   while (KeepIn) {
 
-    if (Touch.dataAvailable()) {
+    if (Display.getTouch(&BtnX, &BtnY)) {
       ProcessTouch();
 
       Red.slide(BtnX, BtnY);
@@ -521,34 +512,9 @@ void Process_SetColors() {
 // my code uses global button x and button y locations
 void ProcessTouch() {
 
-  // depending on the touch library you may need to change methods here
-  Touch.read();
-
-  BtnX = Touch.getX();
-  BtnY = Touch.getY();
-
   // consistency between displays is a mess...
   // this is some debug code to help show
   // where you pressed and the resulting map
-
-  //Serial.print("real coordinates: ");
-  //Serial.print(BtnX);
-  //Serial.print(",");
-  //Serial.println (BtnY);
-  //Display.drawPixel(BtnX, BtnY, C_RED);
-
-  //different values depending on where touch happened
-
-  // x  = map(x, real left, real right, 0, 480);
-  // y  = map(y, real bottom, real top, 320, 0);
-
-  // tft with yellow headers
-  //BtnX  = map(BtnX, 240, 0, 320, 0);
-  //BtnY  = map(BtnY, 379, 0, 240, 0);
-
-  // tft with black headers
-  BtnX  = map(BtnX, 0, 240, 320, 0);
-  BtnY  = map(BtnY, 0, 380, 240, 0);
 
   //Serial.print(", Mapped coordinates: ");
   //Serial.print(BtnX);
@@ -569,7 +535,7 @@ bool ProcessButtonPress(Button TheButton) {
 
   if (TheButton.press(BtnX, BtnY)) {
     TheButton.draw(B_PRESSED);
-    while (Touch.dataAvailable()) {
+    while (Display.getTouch(&BtnX, &BtnY)) {
       if (TheButton.press(BtnX, BtnY)) {
         TheButton.draw(B_PRESSED);
       }

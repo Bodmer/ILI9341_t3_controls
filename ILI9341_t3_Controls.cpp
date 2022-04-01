@@ -33,9 +33,6 @@
 
 
 #include "ILI9341_t3_Controls.h"
-#include <ILI9341_t3.h>     // fast display driver lib
-
-
 
 float degtorad = .0174532778;
 
@@ -96,7 +93,7 @@ horizontal bar chart
 
 *///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BarChartH::BarChartH(ILI9341_t3 *Display){
+BarChartH::BarChartH(TFT_eSPI_ext *Display){
 
 	d = Display;
 
@@ -104,7 +101,7 @@ BarChartH::BarChartH(ILI9341_t3 *Display){
 }
 
 
-void BarChartH::init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor, uint16_t BorderColor, uint16_t BarColor, uint16_t BarBColor, uint16_t BackColor, const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &ScaleFont ){
+void BarChartH::init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor, uint16_t BorderColor, uint16_t BarColor, uint16_t BarBColor, uint16_t BackColor, const tftfont_t &TitleFont , const tftfont_t &ScaleFont ){
 
 	Low = ScaleLow;
 	High = ScaleHigh;
@@ -131,13 +128,12 @@ void BarChartH::draw(float val){
 
   if (redraw == true) {
     redraw = false;
-	   
 
     // step val basically scales the hival and low val to the height
     // deducting a small value to eliminate round off errors
     // this val may need to be adjusted
 	if (ss){
-		d->setFont(sf);
+		d->setTTFont(sf);
 		stepval = MapFloat(Inc, Low, High, 0, gw);
 
 		// paint over previous y scale
@@ -164,17 +160,16 @@ void BarChartH::draw(float val){
 		data =  i * (Inc / stepval);
 
 		dtostrf(data, 0, Dec,text);
-		tLen = d->strPixelLen(text) * 1.2;
+		tLen = d->TTFtextWidth(text) * 1.2;
 		tHi =sf.cap_height;
 		d->setCursor(i + gx - (tLen / 2) , gy + gh + 10);
-
 		d->print(text);
 		}
 	}
 
 	if(st){
 		d->setTextColor(tc, bc);
-		d->setFont(tf);
+		d->setTTFont(tf);
 		tHi = sf.cap_height * 2 + 8;
 		d->setCursor(gx , gy -tHi );
 		d->print(ti);
@@ -240,7 +235,7 @@ vertical bar chart
 
 *///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BarChartV::BarChartV(ILI9341_t3 *Display){
+BarChartV::BarChartV(TFT_eSPI_ext *Display){
 
 	d = Display;
 
@@ -248,7 +243,7 @@ BarChartV::BarChartV(ILI9341_t3 *Display){
 }
 
 
-void BarChartV::init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor,uint16_t BorderColor, uint16_t BarColor, uint16_t BarBlankColor,uint16_t BackgroundColor, const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &ScaleFont ){
+void BarChartV::init(float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float ScaleLow, float ScaleHigh, float ScaleInc, const char *Title, uint16_t TextColor,uint16_t BorderColor, uint16_t BarColor, uint16_t BarBlankColor,uint16_t BackgroundColor, const tftfont_t &TitleFont , const tftfont_t &ScaleFont ){
 
 	Low = ScaleLow;
 	High = ScaleHigh;
@@ -282,7 +277,7 @@ void BarChartV::draw(float val){
 	// this val may need to be adjusted
 
 	if (ss) {
-		d->setFont(sf);
+		d->setTTFont(sf);
 		stepval = MapFloat( Inc,Low, High,gh - gh, gh);
 	
 		// paint over previous y scale
@@ -307,7 +302,7 @@ void BarChartV::draw(float val){
 			}
 			data = High - ( i * (Inc / stepval));
 			dtostrf(data, 0, Dec,text);
-			tLen = d->strPixelLen(text) * 1.2;
+			tLen = d->TTFtextWidth(text) * 1.2;
 			tHi =sf.cap_height;
 			d->setCursor(gx + gw + 12, TempY - (tHi / 2) );
 			d->print(text);
@@ -315,7 +310,7 @@ void BarChartV::draw(float val){
 	}
 	if (st){
 		d->setTextColor(tc, bc);
-		d->setFont(tf);
+		d->setTTFont(tf);
 		tHi =sf.cap_height * 2 + 5;
 		d->setCursor(gx , gy - gh -tHi );
 		d->print(ti);
@@ -377,7 +372,7 @@ cartesian style graphing functions
 
 *///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CGraph::CGraph(ILI9341_t3 *disp, float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float XAxisLow, float XAxisHigh, float XAxisInc, float YAxisLow, float YAxisHigh, float YAxisInc){
+CGraph::CGraph(TFT_eSPI_ext *disp, float GraphXLoc, float GraphYLoc, float GraphWidth, float GraphHeight, float XAxisLow, float XAxisHigh, float XAxisInc, float YAxisLow, float YAxisHigh, float YAxisInc){
 
 		d = disp;
 
@@ -397,7 +392,7 @@ CGraph::CGraph(ILI9341_t3 *disp, float GraphXLoc, float GraphYLoc, float GraphWi
 }
 
 
-void CGraph::init(const char *Title, const char *XAxis, const char *YAxis, uint16_t TextColor, uint16_t GridColor, uint16_t AxisColor, uint16_t BackColor, uint16_t PlotColor, const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &AxisFont ){
+void CGraph::init(const char *Title, const char *XAxis, const char *YAxis, uint16_t TextColor, uint16_t GridColor, uint16_t AxisColor, uint16_t BackColor, uint16_t PlotColor, const tftfont_t &TitleFont , const tftfont_t &AxisFont ){
 
 	strncpy(t, Title, 30);
 	strncpy(xa, XAxis, 30);
@@ -558,7 +553,7 @@ void CGraph::drawGraph() {
 
 	// draw title
 	if (st){
-		d->setFont(tf);
+		d->setTTFont(tf);
 		d->setCursor(gx , gy - gh - TextHeight-10);
 		d->print(t);
 	}
@@ -566,7 +561,7 @@ void CGraph::drawGraph() {
 	// draw grid lines
 	// first blank out xscale for redrawing
 	d->fillRect(gx-10, gy+2, gw+20,25, bc);
-	d->setFont(af);
+	d->setTTFont(af);
 	d->fillRect(gx, gy - gh-4, gw, gh+8, bc);
 	d->fillRect(gx, gy - gh, gw, gh, pc);
 
@@ -661,7 +656,7 @@ void CGraph::drawGraph() {
 	}
 	if (sl) {
 		// draw legend
-		StartPointX = gx-20;
+		StartPointX = gx+10;
 			
 		if (tl == LOCATION_TOP){
 			StartPointY = gy - gh;
@@ -729,7 +724,7 @@ dial type control
 
 *///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Dial::Dial(ILI9341_t3 *disp, int CenterX, int CenterY, int DialRadius, float LowVal , float HiVal , float ValInc, float SweepAngle){
+Dial::Dial(TFT_eSPI_ext *disp, int CenterX, int CenterY, int DialRadius, float LowVal , float HiVal , float ValInc, float SweepAngle){
 
 	degtorad = .0174532778;
 
@@ -758,7 +753,7 @@ Dial::Dial(ILI9341_t3 *disp, int CenterX, int CenterY, int DialRadius, float Low
 
 }
 
-void Dial::init(uint16_t NeedleColor, uint16_t DialColor, uint16_t TextColor, uint16_t TickColor, const char *Title, const ILI9341_t3_font_t &TitleFont , const ILI9341_t3_font_t &DataFont ) {
+void Dial::init(uint16_t NeedleColor, uint16_t DialColor, uint16_t TextColor, uint16_t TickColor, const char *Title, const tftfont_t &TitleFont , const tftfont_t &DataFont ) {
 
 	tf = TitleFont;
 	df = DataFont;
@@ -782,7 +777,7 @@ void Dial::draw(float Val) {
 	}
 
 	// draw the current value
-	d->setFont(df);
+	d->setTTFont(df);
 	d->setTextColor(tc, dc);
 	d->setCursor(cx - 25, cy + 20 );
 	//disp.println(Format(curval, dig, dec));
@@ -829,7 +824,7 @@ void Dial::draw(float Val) {
 
 		data = hv - ( i * (inc / stepval)) ;
 		dtostrf(data, 0, dec,buf);
-		tLen = d->strPixelLen(buf);
+		tLen = d->TTFtextWidth(buf);
 		tHi = df.cap_height;
 		d->setCursor(dx - (tLen/2), dy - (tHi/2));
 	
@@ -843,7 +838,15 @@ void Dial::draw(float Val) {
 	angle = angle * degtorad;
 	angle = offset - angle  ;
 
-	// draw a triangle for the needle (compute and store 3 vertiticies)
+	// print the title first
+	d->setTextColor(tc, dc);
+	d->setTTFont(tf);
+	tLen = d->TTFtextWidth(t);
+			
+	d->setCursor(cx - tLen/2, cy + 10);
+	d->println(t);
+
+	// draw a triangle for the needle (compute and store 3 vertices)
 	// 5.0 is width of needle at center
 	ix =  (float)(dr - 10.0) * cos(angle) + cx;
 	iy =  (float)(dr - 10.0) * sin(angle) + cy;
@@ -858,14 +861,6 @@ void Dial::draw(float Val) {
 	// draw a cute little dial center
 	d->fillCircle(cx, cy, 8, tc);
 
-	// print the title
-	d->setTextColor(tc, dc);
-	d->setFont(tf);
-	tLen = d->strPixelLen(t);
-			
-	d->setCursor(cx - tLen/2, cy + 10);
-	d->println(t);
-	
 	//save all current to old so the previous dial can be hidden
 	pix = ix;
 	piy = iy;
@@ -882,11 +877,11 @@ void Dial::draw(float Val) {
 
 /*
 
-class for a vertical type slider, you pass in the coordinates for placement and colors, we'll pass in scale during initilization as scale may depend on some computed value
+class for a vertical type slider, you pass in the coordinates for placement and colors, we'll pass in scale during initialization as scale may depend on some computed value
 
 */
 
-SliderV::SliderV(ILI9341_t3 *Display)
+SliderV::SliderV(TFT_eSPI_ext *Display)
 
 {
 	// map arguements to class variables
@@ -1350,7 +1345,7 @@ void SliderV::setPressDebounce(byte Debounce) {
 class for a horizontal type slider, you pass in the coordinates for placement and colors, we'll pass in scale during initilization as scale may depend on some computed value
 
 */
-SliderH::SliderH(ILI9341_t3 *Display)
+SliderH::SliderH(TFT_eSPI_ext *Display)
 
 {
 	// map arguements to class variables
@@ -1838,7 +1833,7 @@ void SliderH::setPressDebounce(byte Debounce) {
 class for a simpel slider-type on off switch, you pass in the coordinates for placement and colors, we'll pass in scale during initilization as scale may depend on some computed value
 
 */
-SliderOnOff::SliderOnOff(ILI9341_t3 *display, uint16_t SliderX, uint16_t SliderY, uint16_t SliderW, uint16_t SliderH, uint16_t SliderColor, uint16_t BackColor, uint16_t OnColor, uint16_t OffColor)
+SliderOnOff::SliderOnOff(TFT_eSPI_ext *display, uint16_t SliderX, uint16_t SliderY, uint16_t SliderW, uint16_t SliderH, uint16_t SliderColor, uint16_t BackColor, uint16_t OnColor, uint16_t OffColor)
 
 {
 	// map arguements to class variables
@@ -2013,7 +2008,7 @@ class for a vertical type slider, you pass in the coordinates for placement and 
 
 */
 
-SliderD::SliderD(ILI9341_t3 *Display)
+SliderD::SliderD(TFT_eSPI_ext *Display)
 
 {
 	// map arguements to class variables

@@ -1,12 +1,12 @@
 /*
 
-  MCU                       https://www.amazon.com/Teensy-3-2-with-pins/dp/B015QUPO5Y/ref=sr_1_2?s=industrial&ie=UTF8&qid=1510373806&sr=1-2&keywords=teensy+3.2
-  Display                   https://www.amazon.com/Wrisky-240x320-Serial-Module-ILI9341/dp/B01KX26JJU/ref=sr_1_10?ie=UTF8&qid=1510373771&sr=8-10&keywords=240+x+320+tft
-  display library           https://github.com/PaulStoffregen/ILI9341_t3
-  touchscreen lib           https://github.com/dgolda/UTouch
+  MCU                       Any compatible with TFT_eSPI
+  Display                   Any compatible with TFT_eSPI
+  display library           https://github.com/Bodmer/TFT_eSPI
+  extension library         https://github.com/Bodmer/TFT_eSPI_ext
 
   // required
-  Button(ILI9341_t3 *Display) {d = Display; }
+  Button(TFT_eSPI *Display) {d = Display; }
   void init(int16_t ButtonX, int16_t ButtonY, uint8_t ButtonWidth, uint8_t ButtonHeight,
     uint16_t OutlineColor, uint16_t ButtonColor, uint16_t TextColor, uint16_t BackgroundColor,
     const char *ButtonText, int TextOffsetX, int TextOffsetY, const ILI9341_t3_font_t &TextFont ) {
@@ -37,31 +37,31 @@
   To implement a button is 5 lines of code, look for the Step x below
 
 */
-
-#include <ILI9341_t3.h>           // fast display driver lib
+#include "FS.h"
+#include <TFT_eSPI.h>
+#include <TFT_eSPI_ext.h>
 
 // step 1 include the library
 #include <ILI9341_t3_Controls.h>
 #include <font_Arial.h>           // custom fonts that ships with ILI9341_t3.h
 #include <font_ArialBold.h>
-#include "UTouch.h"
 
 // you must create and pass fonts to the function
 #define FONT_TEXT Arial_24
 #define FONT_LBUTTON Arial_16
 #define FONT_SBUTTON Arial_12_Bold
 
-// For the Adafruit shield, these are the default.
-#define TFT_DC  9
-#define TFT_CS 10
 unsigned long i;
-int BtnX, BtnY, ct = -1;
+uint16_t BtnX, BtnY, ct = -1;
 bool rs = true, st = true;
 char buf[1];
-// create the display object
-ILI9341_t3 Display(TFT_CS, TFT_DC);
 
-UTouch  Touch( 6, 5, 4, 3, 2);
+// create the display object
+TFT_eSPI      tft = TFT_eSPI();
+TFT_eSPI_ext  Display = TFT_eSPI_ext(&tft);
+
+#define CALIBRATION_FILE "/TouchCalData1"
+#define REPEAT_CAL false
 
 // step 2 create a button object for each button, pass in the display object
 Button Button1(&Display);
@@ -72,18 +72,16 @@ Button Button5(&Display);
 
 void setup() {
 
-  Serial.begin(57600);
+  Serial.begin(115200);
 
   // fire up the display
   Display.begin();
   Display.setRotation(1);
-  Display.fillScreen(C_BLACK);
-  analogWrite(A9, 255);
-  // fire up the touch display
 
-  // you may need this depending on your display
-  Touch.InitTouch(PORTRAIT);
-  Touch.setPrecision(PREC_EXTREME);
+  uint16_t calData[5] = { 243, 3657, 243, 3576, 7 };
+  Display.setTouch(calData);
+
+  Display.fillScreen(C_BLACK);
 
   // step 3 initialize each button, passing in location, size, colors, button text,
   // button text offsets (to help manage text location on the button and the ILI9341 font
@@ -106,7 +104,7 @@ void setup() {
 
 void loop() {
 
-  if (Touch.dataAvailable()) {
+  if (Display.getTouch(&BtnX, &BtnY)) {
 
     ProcessTouch();
 
@@ -116,7 +114,7 @@ void loop() {
     // with text that says On/Off and in a color such as Green/Red
     // just call the draw event after chaning parameters
     if (ProcessButtonPress(Button1)) {
-      Display.setFont(FONT_TEXT);
+      Display.setTTFont(FONT_TEXT);
       Display.setTextColor(C_WHITE);
       Display.setCursor(150, 5);
       Display.print("Pressed");
@@ -195,12 +193,6 @@ void loop() {
 // my code uses global button x and button y locations
 void ProcessTouch() {
 
-  // depending on the touch library you may need to change methods here
-  Touch.read();
-
-  BtnX = Touch.getX();
-  BtnY = Touch.getY();
-
   // consistency between displays is a mess...
   // this is some debug code to help show
   // where you pressed and the resulting map
@@ -221,8 +213,8 @@ void ProcessTouch() {
   //BtnY  = map(BtnY, 379, 0, 240, 0);
 
   // tft with black headers
-  BtnX  = map(BtnX, 0, 240, 320, 0);
-  BtnY  = map(BtnY, 0, 380, 240, 0);
+ // BtnX  = map(BtnX, 0, 240, 320, 0);
+ // BtnY  = map(BtnY, 0, 380, 240, 0);
 
   Serial.print(", Mapped coordinates: ");
   Serial.print(BtnX);
@@ -241,7 +233,7 @@ bool ProcessButtonPress(Button TheButton) {
 
   if (TheButton.press(BtnX, BtnY)) {
     TheButton.draw(B_PRESSED);
-    while (Touch.dataAvailable()) {
+    while (Display.getTouch(&BtnX, &BtnY)) {
       if (TheButton.press(BtnX, BtnY)) {
         TheButton.draw(B_PRESSED);
       }
@@ -256,4 +248,69 @@ bool ProcessButtonPress(Button TheButton) {
     return true;
   }
   return false;
+}
+
+void touch_calibrate()
+{
+  uint16_t calData[5];
+  uint8_t calDataOK = 0;
+
+  // check file system exists
+  if (!LittleFS.begin()) {
+    Serial.println("Formating file system");
+    LittleFS.format();
+    LittleFS.begin();
+  }
+
+  // check if calibration file exists and size is correct
+  if (LittleFS.exists(CALIBRATION_FILE)) {
+    if (REPEAT_CAL)
+    {
+      // Delete if we want to re-calibrate
+      LittleFS.remove(CALIBRATION_FILE);
+    }
+    else
+    {
+      File f = LittleFS.open(CALIBRATION_FILE, "r");
+      if (f) {
+        if (f.readBytes((char *)calData, 14) == 14)
+          calDataOK = 1;
+        f.close();
+      }
+    }
+  }
+
+  if (calDataOK && !REPEAT_CAL) {
+    // calibration data valid
+    tft.setTouch(calData);
+  } else {
+    // data not valid so recalibrate
+    tft.fillScreen(TFT_BLACK);
+    tft.setCursor(20, 0);
+    tft.setTextFont(2);
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+    tft.println("Touch corners as indicated");
+
+    tft.setTextFont(1);
+    tft.println();
+
+    if (REPEAT_CAL) {
+      tft.setTextColor(TFT_RED, TFT_BLACK);
+      tft.println("Set REPEAT_CAL to false to stop this running again!");
+    }
+
+    tft.calibrateTouch(calData, TFT_MAGENTA, TFT_BLACK, 15);
+
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    tft.println("Calibration complete!");
+
+    // store data
+    File f = LittleFS.open(CALIBRATION_FILE, "w");
+    if (f) {
+      f.write((const unsigned char *)calData, 14);
+      f.close();
+    }
+  }
 }
