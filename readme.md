@@ -1,9 +1,16 @@
-Updated by Bodmer for TFT_eSPI library
+Forked and updated by Bodmer for the TFT_eSPI library
 
-Requires use of TFT_eSPI extension library here:
+The library will now work with any touch TFT and processor supported by TFT_eSPI, not just the ILI9341 and T3 as implied by the library name.
+
+Requires use of TFT_eSPI library:
+https://github.com/Bodmer/TFT_eSPI
+
+and the font extension library here:
 https://github.com/Bodmer/TFT_eSPI_ext
 
-Original ReadMe follows:
+
+
+# Original ReadMe by Kris follows:
 
 <b><h2><center>Version 5.4 updated 12/20/2021</center></h1></b>
 1. Added a ring slider
